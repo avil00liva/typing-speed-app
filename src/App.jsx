@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import randomWords from "random-words"
 
 const NUMB_OF_WORDS = 200
-const SECONDS = 30
+const SECONDS = 60
 
 
 function App() {
@@ -10,9 +10,11 @@ function App() {
   const [countDown, setCountDown]= useState(SECONDS)
   const [currentInput, setCurrentInput]= useState("")
   const [currentWordIndex, setCurrenWordIndex]= useState(0)
+  const [currentChar, setCurrentChar]= useState("")
+  const [currentCharIndex, setCurrentCharIndex]= useState(-1)
   const [correct, setCorrect] = useState(0)
   const [incorrect, setIncorrect] = useState(0)
-  const [fieldDisable, setFieldDisable] = useState(false)
+  const [fieldDisable, setFieldDisable] = useState(true)
   const [showResult, setShowResult] = useState(false)
   const [restart, setRestart] = useState(false)
 
@@ -25,6 +27,7 @@ function App() {
   },[])
 
   const start = ()=>{
+    setFieldDisable(false)
     const interval =   setInterval(()=>{
       setCountDown((prevCountdown)=> {
         if(prevCountdown === 0) {
@@ -51,6 +54,8 @@ function App() {
     setFieldDisable(false)
     setShowResult(false)
     setRestart(false)
+    setCurrentCharIndex(-1)
+    setCurrentChar("")
 
     const interval =   setInterval(()=>{
       setCountDown((prevCountdown)=> {
@@ -67,11 +72,15 @@ function App() {
     },1000)
   }
 
-  const handleKeyDown = ({keyCode})=>{
+  const handleKeyDown = ({keyCode, key})=>{
     if(keyCode === 32) {
       checkMatch()
       setCurrentInput("")
       setCurrenWordIndex(currentWordIndex + 1)
+      setCurrentCharIndex(-1)
+    } else {
+      setCurrentCharIndex(currentCharIndex + 1)
+      setCurrentChar(key)
     }
   }
 
@@ -82,6 +91,18 @@ function App() {
       setCorrect(correct + 1)
     } else {
       setIncorrect(incorrect + 1)
+    }
+  }
+
+  function getCharClass(wordIdx, charIdx, char) {
+    if(wordIdx === currentWordIndex && charIdx === currentCharIndex && currentChar && restart === false){
+      if(char === currentChar) {
+        return "bg-green-500"
+      } else {
+        return "bg-red-500"
+      }
+    } else {
+      return " "
     }
   }
 
@@ -108,7 +129,7 @@ function App() {
               <span key={i}>
                 <span>
                   {word.split("").map((char, idx) => (
-                    <span key={idx}>{char}</span>
+                    <span className={getCharClass(i, idx, char)} key={idx}>{char}</span>
                   )) }
                 </span>
                 <span> </span>
